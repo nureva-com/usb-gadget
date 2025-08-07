@@ -255,6 +255,9 @@ pub enum UsbVersion {
     /// USB 2.0
     #[default]
     V20,
+    /// USB "2.1" - needed for WinUSB
+    /// see: https://github.com/newaetech/naeusb/blob/main/wcid.md
+    V21,
     /// USB 3.0
     V30,
     /// USB 3.1
@@ -268,6 +271,7 @@ impl From<UsbVersion> for u16 {
         match value {
             UsbVersion::V11 => 0x0110,
             UsbVersion::V20 => 0x0200,
+            UsbVersion::V21 => 0x0201, 
             UsbVersion::V30 => 0x0300,
             UsbVersion::V31 => 0x0310,
             UsbVersion::Other(ver) => ver,
@@ -320,6 +324,12 @@ impl Gadget {
             web_usb: None,
             configs: Vec::new(),
         }
+    }
+
+    /// add ability to change USB version from default 2.0
+    pub fn with_usb_version(mut self, usb_ver: UsbVersion) -> Self {
+        self.usb_version = usb_ver;
+        self
     }
 
     /// Adds a USB device configuration.
