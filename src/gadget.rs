@@ -14,6 +14,7 @@ use std::{
 };
 
 use crate::{
+    bos::BosDescriptor,
     configfs_dir, function,
     function::{
         util::{call_remove_handler, init_remove_handlers},
@@ -303,6 +304,8 @@ pub struct Gadget {
     pub max_speed: Option<Speed>,
     /// OS descriptor extension.
     pub os_descriptor: Option<OsDescriptor>,
+    /// optional BOS descriptor extension
+    pub bos_descriptor: Option<BosDescriptor>,
     /// WebUSB extension.
     pub web_usb: Option<WebUsb>,
     /// USB device configurations.
@@ -321,6 +324,7 @@ impl Gadget {
             usb_version: UsbVersion::default(),
             max_speed: None,
             os_descriptor: None,
+            bos_descriptor: None,
             web_usb: None,
             configs: Vec::new(),
         }
@@ -349,6 +353,11 @@ impl Gadget {
     pub fn with_os_descriptor(mut self, os_descriptor: OsDescriptor) -> Self {
         self.os_descriptor = Some(os_descriptor);
         self
+    }
+
+    /// Sets the BOS descriptor
+    pub fn with_bos_descriptor(&mut self, bos: BosDescriptor) {
+        self.bos_descriptor = Some(bos);
     }
 
     /// Sets the WebUSB extension.
@@ -456,6 +465,16 @@ impl Gadget {
             } else {
                 log::warn!("USB OS descriptor is unsupported by kernel");
             }
+        }
+
+        // write the BOS descriptor (if exists)
+        if let Some(bos_desc) = &self.bos_descriptor {
+            let bos_desc_dir = dir.join("os_desc/bos");
+            if bos_desc_dir.is_dir() {
+                fs::write(bos_desc_dir, bos_desc.to_bytes())?;
+            }
+        } else {
+            log::warn!("No BOS descriptor present");
         }
 
         log::debug!("gadget at {} registered", dir.display());
