@@ -46,6 +46,9 @@ pub use udc::*;
 mod lang;
 pub use lang::*;
 
+mod bos;
+pub use bos::*;
+
 /// USB speed.
 #[derive(
     Default, Debug, strum::Display, strum::EnumString, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
