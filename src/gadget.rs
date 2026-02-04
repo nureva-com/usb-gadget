@@ -420,7 +420,7 @@ impl Gadget {
             fs::write(lang_dir.join("serialnumber"), &strs.serial_number)?;
         }
 
-        let functions: HashSet<_> = self.configs.iter().flat_map(|c| &c.functions).collect();
+        let functions: Vec<_> = self.configs.iter().flat_map(|c| &c.functions).collect();
         let mut func_dirs = HashMap::new();
         for (func_idx, &func) in functions.iter().enumerate() {
             let func_dir = dir.join(
@@ -452,6 +452,7 @@ impl Gadget {
                 let config_dir = config_dirs.get(os_desc.config).ok_or_else(|| {
                     Error::new(ErrorKind::InvalidInput, "invalid configuration index in OS descriptor")
                 })?;
+                log::debug!("linking os descriptor dir {:?} to config dir {:?}", os_desc_dir, config_dir);
                 symlink(config_dir, os_desc_dir.join(config_dir.file_name().unwrap()))?;
             } else {
                 log::warn!("USB OS descriptor is unsupported by kernel");
